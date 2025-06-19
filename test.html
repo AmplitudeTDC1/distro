@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CORS Test</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <title>DISTRO - CORS Test</title>
 </head>
 <body>
- <button onclick="testAPI()">Test API</button>
+  <h2>Click to Test API</h2>
+  <button onclick="testAPI()">Test API</button>
 
-<script>
-function testAPI() {
-  fetch("https://script.google.com/macros/s/AKfycbzJR3DFFFkWOos5EfZB7ureWgdyo96K0KKGY_J_3OeyoT2yMZlt2U-no8IYL4ZWV1nT/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ test: "hello world" })
-  })
-  .then(res => res.json())
-  .then(data => alert("Success: " + JSON.stringify(data)))
-  .catch(err => alert("Error: " + err.message));
-}
-</script>
-
+  <script>
+    function testAPI() {
+      fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "test" })
+      })
+      .then(res => res.json())
+      .then(data => alert("✅ Response: " + JSON.stringify(data)))
+      .catch(err => alert("❌ Error: " + err.message));
+    }
+  </script>
 </body>
 </html>
