@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Delivery Order</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Submit Delivery Order</h2>
+  <form id="orderForm" onsubmit="submitOrder(event)">
+    <input type="text" id="clientName" placeholder="Client Name" required>
+    <input type="text" id="houseNumber" placeholder="House/Office Number" required>
+    <input type="text" id="streetName" placeholder="Street Name" required>
+    <input type="text" id="busStop" placeholder="Nearest Bus-stop" required>
+    <input type="text" id="landmark" placeholder="Closest Landmark" required>
+    <input type="tel" id="mainPhone" placeholder="Main Phone Number" required>
+    <input type="tel" id="altPhone" placeholder="Alternative Phone Number">
+    <input type="text" id="deliveryWindow" placeholder="Delivery Window (e.g. between the hours of 10AM and 2PM)" required>
+    <textarea id="packageDetails" placeholder="Package Details" required></textarea>
+    <button type="submit" id="submitBtn">Submit Order</button>
+  </form>
+
+  <script>
+    async function submitOrder(event) {
+      event.preventDefault();
+
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+
+      const clientName = document.getElementById("clientName").value.trim();
+      const houseNumber = document.getElementById("houseNumber").value.trim();
+      const streetName = document.getElementById("streetName").value.trim();
+      const busStop = document.getElementById("busStop").value.trim();
+      const landmark = document.getElementById("landmark").value.trim();
+      const mainPhone = document.getElementById("mainPhone").value.trim();
+      const altPhone = document.getElementById("altPhone").value.trim();
+      const deliveryWindow = document.getElementById("deliveryWindow").value.trim();
+      const packageDetails = document.getElementById("packageDetails").value.trim();
+
+      // Basic client-side validation
+      if (!clientName || !houseNumber || !streetName || !busStop || !landmark || !mainPhone || !deliveryWindow || !packageDetails) {
+        Swal.fire("Missing Fields", "Please fill in all required fields.", "warning");
+        btn.disabled = false;
+        btn.innerText = "Submit Order";
+        return;
+      }
+
+      const formData = {
+        clientName,
+        houseNumber,
+        streetName,
+        busStop,
+        landmark,
+        mainPhone,
+        altPhone,
+        deliveryWindow,
+        packageDetails
+      };
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzXHXPJ4ZEkvdFwE5X3VoRVXns2GYb0dpO7DnKX5IYR3iUIx-wGhEg_fgWZYMPb0uTc/exec", {
+          method: "POST",
+          mode: "no-cors", // Change to 'cors' if you expect to read the response
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+
+        // Show success popup
+        Swal.fire("Success", "Your delivery order has been submitted!", "success");
+        document.getElementById("orderForm").reset();
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong while submitting your order. Please try again.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit Order";
+      }
+    }
+  </script>
+
+</body>
+</html>

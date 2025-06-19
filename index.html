@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DISTRO Logistics | Sign In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffffff, #f5f7fa);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .hero {
+      padding: 60px 20px;
+      background: #1b1f3b;
+      color: white;
+    }
+
+    .logo {
+      font-size: 42px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .tagline {
+      font-size: 18px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .login-buttons {
+      margin-top: 40px;
+    }
+
+    .btn {
+      margin: 10px;
+      padding: 14px 26px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-admin { background-color: #ff4757; color: white; }
+    .btn-agent { background-color: #3742fa; color: white; }
+    .btn-client { background-color: #2ed573; color: white; }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: left;
+      animation: slideDown 0.4s ease;
+    }
+
+    .close {
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: black;
+    }
+
+    input, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .submit-btn {
+      background: #1b1f3b;
+      color: white;
+      width: 100%;
+    }
+
+     @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="logo">DISTRO</div>
+    <div class="tagline">Efficient Job Distribution for Urban Logistics</div>
+
+    <div class="login-buttons">
+      <button class="btn btn-admin" onclick="openModal('Admin')">Admin Login</button>
+      <button class="btn btn-agent" onclick="openModal('Agent')">Agent Login</button>
+      <button class="btn btn-client" onclick="openModal('Client')">Client Login</button>
+    </div>
+  </section>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 id="loginTitle">Login</h3>
+
+      <form id="loginForm" onsubmit="submitLogin(event)">
+        <input type="hidden" id="role" name="role" value="">
+        <label>Username</label>
+        <input type="text" id="username" required>
+
+        <label>Password</label>
+        <input type="password" id="password" required>
+
+        <button type="submit" class="btn submit-btn">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    const loginModal = document.getElementById("loginModal");
+    const roleInput = document.getElementById("role");
+    const loginTitle = document.getElementById("loginTitle");
+
+    function openModal(role) {
+      roleInput.value = role.toLowerCase();
+      loginTitle.textContent = `${role} Login`;
+      loginModal.style.display = "block";
+    }
+
+    function closeModal() {
+      loginModal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target === loginModal) {
+        loginModal.style.display = "none";
+      }
+    }
+
+    function submitLogin(e) {
+      e.preventDefault();
+
+      const payload = {
+        type: "login",
+        role: roleInput.value,
+        username: document.getElementById("username").value.trim(),
+        password: document.getElementById("password").value.trim()
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbzXHXPJ4ZEkvdFwE5X3VoRVXns2GYb0dpO7DnKX5IYR3iUIx-wGhEg_fgWZYMPb0uTc/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(response => {
+        if (response.status === "success") {
+          Swal.fire("Login Successful", response.message, "success");
+          // Redirect based on role
+          setTimeout(() => {
+            if (payload.role === "admin") location.href = "admin-dashboard.html";
+            else if (payload.role === "agent") location.href = "agent-dashboard.html";
+            else if (payload.role === "client") location.href = "client-dashboard.html";
+          }, 1500);
+        } else {
+          Swal.fire("Login Failed", response.message, "error");
+        }
+      })
+      .catch(() => {
+        Swal.fire("Error", "Network error. Please try again later.", "error");
+      });
+    }
+  </script>
+</body>
+</html>

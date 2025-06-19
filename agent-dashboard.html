@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agent Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .dashboard {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: auto;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 30px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: left;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+    <h2>Welcome, Agent</h2>
+    <p>Please update your current location before receiving job assignments.</p>
+    <button class="btn" id="openModal">Submit My Location</button>
+  </div>
+
+  <!-- Location Modal -->
+  <div id="locationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h3>Submit Location</h3>
+      <form id="locationForm" onsubmit="submitLocation(event)">
+        <label>Agent ID</label>
+        <input type="text" id="agentId" placeholder="AGT001" required>
+        <label>Latitude</label>
+        <input type="text" id="latitude" readonly>
+        <label>Longitude</label>
+        <input type="text" id="longitude" readonly>
+        <button type="button" class="btn" onclick="getLocation()">Get My Location</button>
+        <button type="submit" class="btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Modal control
+    const modal = document.getElementById("locationModal");
+    const openBtn = document.getElementById("openModal");
+    const closeBtn = document.getElementById("closeModal");
+
+    openBtn.onclick = () => modal.style.display = "block";
+    closeBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (e) => {
+      if (e.target == modal) modal.style.display = "none";
+    };
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          document.getElementById("latitude").value = position.coords.latitude.toFixed(6);
+          document.getElementById("longitude").value = position.coords.longitude.toFixed(6);
+        }, () => {
+          Swal.fire("Error", "Unable to retrieve location. Check GPS settings.", "error");
+        });
+      } else {
+        Swal.fire("Unsupported", "Geolocation is not supported by your browser.", "warning");
+      }
+    }
+
+    function submitLocation(e) {
+      e.preventDefault();
+
+      const data = {
+        agentId: document.getElementById("agentId").value.trim(),
+        latitude: document.getElementById("latitude").value,
+        longitude: document.getElementById("longitude").value
+      };
+
+      if (!data.latitude || !data.longitude) {
+        Swal.fire("Missing Location", "Please fetch your current location before submitting.", "warning");
+        return;
+      }
+
+     fetch("https://script.google.com/macros/s/AKfycbzXHXPJ4ZEkvdFwE5X3VoRVXns2GYb0dpO7DnKX5IYR3iUIx-wGhEg_fgWZYMPb0uTc/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    type: "location", // Important identifier for backend routing
+    agentId: data.agentId,
+    latitude: data.latitude,
+    longitude: data.longitude
+  })
+})
+.then(res => res.json())
+.then(response => {
+  if (response.status === "success") {
+    Swal.fire("Success", response.message || "Location updated!", "success");
+    document.getElementById("locationForm").reset();
+    modal.style.display = "none";
+  } else {
+    Swal.fire("Error", response.message || "Failed to update location.", "error");
+  }
+})
+.catch(() => {
+  Swal.fire("Error", "Network or script error. Please try again.", "error");
+});
+    }
+  </script>
+</body>
+</html>
